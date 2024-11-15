@@ -28,38 +28,61 @@ class GeometrySolver:
         self.text = text
 
     def extract_rhombus_side(self):
+        # Пошук чисел, що можуть бути сторонами ромба
         sides = re.findall(r"(\d+)", self.text)
         if sides:
-            side = int(sides[0])
+            side = int(sides[0])  # Перша знайдена сторона
             return side
         return None
 
     def calculate_perimeter(self, side):
+        # Периметр ромба: 4 * сторона
         return 4 * side
 
     def extract_coordinates(self):
+        # Пошук координат точок у форматі (x, y) або (x;y)
         coordinates = re.findall(r"[А-Яа-я]\((\d+)[,;](\d+)\)", self.text)
         return [(int(x), int(y)) for x, y in coordinates]
 
     def calculate_distance(self, point1, point2):
+        # Формула для обчислення відстані між двома точками
         x1, y1 = point1
         x2, y2 = point2
         return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
     def calculate_side_length(self, coordinates):
+        # Для ромба, беремо відстань між двома сусідніми точками
         side = self.calculate_distance(coordinates[0], coordinates[1])
         return side
 
+    def extract_angle(self):
+        # Пошук кута в градусах
+        angle = re.findall(r"(\d+)[°]", self.text)
+        if angle:
+            return float(angle[0])  # Повертаємо знайдений кут
+        return None
+
+    def calculate_area(self, side, angle):
+        # Площа ромба: S = a^2 * sin(α), де α — кут у градусах
+        angle_rad = math.radians(angle)  # Перетворюємо кут у радіани
+        area = side ** 2 * math.sin(angle_rad)
+        return area
+
     def solve(self):
         side = self.extract_rhombus_side()
+        coordinates = self.extract_coordinates()
+        angle = self.extract_angle()
+
+        if side and angle:
+            area = self.calculate_area(side, angle)
+            return f"Площа ромба з стороною {side} та кутом {angle}° = {area:.2f}"
+
         if side:
             perimeter = self.calculate_perimeter(side)
             return f"Периметр ромба з стороною {side} = {perimeter}, довжина сторони = {side}"
 
-        coordinates = self.extract_coordinates()
         if len(coordinates) == 4:
             side_length = self.calculate_side_length(coordinates)
-
             perimeter = 4 * side_length
             return f"Довжина сторони ромба = {side_length:.2f}, Периметр ромба = {perimeter:.2f}"
 
@@ -69,16 +92,18 @@ class GeometrySolver:
 tests = [
     "Побудувати ромб ABCD зі стороною 2, знайти його периметр.",
     "Побудувати ромб з координатами А(5,0), В(0,5), С(−5,0), D(0,−5), обчислити довжину сторони, знайти його периметр.",
+    "Побудувати ромб ABCD зі стороною 6 і кутом 30°, знайти його площу.",
 ]
 
-for command_text in tests:
+for i, command_text in enumerate(tests, start=1):
     try:
+        print(f"Задача {i}: {command_text}")
         result = UDPipeAPI.process_text(command_text)
         # print(f"Лінгвістичний аналіз тексту: {result['result']}")
 
         solver = GeometrySolver(command_text)
         solution = solver.solve()
-        print(solution)
+        print(f"Рішення: {solution}\n")
 
     except Exception as e:
-        print(f"Помилка при обробці тексту: {e}")
+        print(f"Помилка при обробці тексту: {e}\n")
