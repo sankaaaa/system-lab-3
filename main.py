@@ -73,6 +73,12 @@ class GeometrySolver:
         d2 = d1  # У ромбі діагоналі рівні
         return d1, d2
 
+    def calculate_height(self, side, angle):
+        # Висота ромба: h = a * sin(α)
+        angle_rad = math.radians(angle)  # Перетворюємо кут у радіани
+        height = side * math.sin(angle_rad)
+        return height
+
     def solve(self):
         side = self.extract_rhombus_side()
         coordinates = self.extract_coordinates()
@@ -122,6 +128,14 @@ class GeometrySolver:
             perimeter = 4 * side_length
             return f"Довжина сторони ромба = {side_length:.2f}, Периметр ромба = {perimeter:.2f}"
 
+        # Задача 6: Висота ромба
+        if re.search(r"\bвисот(а|у|)", self.text, re.IGNORECASE):
+            if side and angle:
+                height = self.calculate_height(side, angle)
+                return f"Висота ромба з стороною {side} і кутом {angle}° = {height:.2f}"
+            else:
+                return "Не вдалося обчислити висоту через відсутність сторони або кута."
+
         return "Не вдалося знайти достатньо даних для розв'язання задачі."
 
 
@@ -130,15 +144,13 @@ tests = [
     "Побудувати ромб ABCD зі стороною 3, знайти його периметр.",
     "Побудувати ромб ABCD зі стороною 2 і кутом 30°, знайти його площу.",
     "Побудувати ромб ABCD зі стороною 8 і кутом 30°, знайти його діагональ.",
-    "Діагональ AC ромба ABCD утворює зі стороною AD кут 42°. Знайдіть усі кути ромба."
+    "Діагональ AC ромба ABCD утворює зі стороною AD кут 42°. Знайдіть усі кути ромба.",
+    "Ромб зі стороною 4 і кутом 30°, знайти висоту."
 ]
 
 for i, command_text in enumerate(tests, start=1):
     try:
         print(f"Задача {i}: {command_text}")
-        result = UDPipeAPI.process_text(command_text)
-        # print(f"Лінгвістичний аналіз тексту: {result['result']}")
-
         solver = GeometrySolver(command_text)
         solution = solver.solve()
         print(f"Рішення: {solution}\n")
