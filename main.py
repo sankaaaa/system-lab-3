@@ -73,15 +73,24 @@ class GeometrySolver:
         coordinates = self.extract_coordinates()
         angle = self.extract_angle()
 
-        if side and angle:
-            area = self.calculate_area(side, angle)
-            return f"Площа ромба з стороною {side} та кутом {angle}° = {area:.2f}"
+        if re.search(r"\bплощ(а|у|і|)", self.text, re.IGNORECASE):
+            if side and angle:
+                area = self.calculate_area(side, angle)
+                return f"Площа ромба з стороною {side} та кутом {angle}° = {area:.2f}"
+            elif len(coordinates) == 4 and angle:
+                side_length = self.calculate_side_length(coordinates)
+                area = self.calculate_area(side_length, angle)
+                return f"Площа ромба з довжиною сторони {side_length:.2f} та кутом {angle}° = {area:.2f}"
+            elif side:
+                return f"Не вистачає кута для обчислення площі ромба з стороною {side}"
+            else:
+                return "Не вдалося обчислити площу через відсутність даних про сторону або кут"
 
-        if side:
+        if "периметр" in self.text:
             perimeter = self.calculate_perimeter(side)
             return f"Периметр ромба з стороною {side} = {perimeter}, довжина сторони = {side}"
 
-        if len(coordinates) == 4:
+        if "координатами" in self.text and len(coordinates) == 4:
             side_length = self.calculate_side_length(coordinates)
             perimeter = 4 * side_length
             return f"Довжина сторони ромба = {side_length:.2f}, Периметр ромба = {perimeter:.2f}"
@@ -90,9 +99,9 @@ class GeometrySolver:
 
 
 tests = [
-    "Побудувати ромб ABCD зі стороною 2, знайти його периметр.",
-    "Побудувати ромб з координатами А(5,0), В(0,5), С(−5,0), D(0,−5), обчислити довжину сторони, знайти його периметр.",
-    "Побудувати ромб ABCD зі стороною 6 і кутом 30°, знайти його площу.",
+    "Побудувати ромб ABCD зі стороною 3, знайти його периметр.",
+    "Побудувати ромб з координатами А(4,2), В(6,4), С(4,6), D(2,4), обчислити довжину сторони, знайти його периметр.",
+    "Побудувати ромб ABCD зі стороною 2 і кутом 60°, знайти його площу.",
 ]
 
 for i, command_text in enumerate(tests, start=1):
