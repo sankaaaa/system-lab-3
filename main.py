@@ -68,11 +68,25 @@ class GeometrySolver:
         area = side ** 2 * math.sin(angle_rad)
         return area
 
+    def calculate_diagonals(self, side, angle):
+        d1 = 2 * side * math.sin(math.radians(angle / 2))
+        d2 = d1  # У ромбі діагоналі рівні
+        return d1, d2
+
     def solve(self):
         side = self.extract_rhombus_side()
         coordinates = self.extract_coordinates()
         angle = self.extract_angle()
 
+        # Задача 1: Периметр ромба
+        if "периметр" in self.text:
+            if side:
+                perimeter = self.calculate_perimeter(side)
+                return f"Периметр ромба з стороною {side} = {perimeter}, довжина сторони = {side}"
+            else:
+                return "Не вдалося знайти сторону для обчислення периметра ромба."
+
+        # Задача 2: Площа ромба
         if re.search(r"\bплощ(а|у|і|)", self.text, re.IGNORECASE):
             if side and angle:
                 area = self.calculate_area(side, angle)
@@ -86,10 +100,23 @@ class GeometrySolver:
             else:
                 return "Не вдалося обчислити площу через відсутність даних про сторону або кут"
 
-        if "периметр" in self.text:
-            perimeter = self.calculate_perimeter(side)
-            return f"Периметр ромба з стороною {side} = {perimeter}, довжина сторони = {side}"
+        # Задача 4: Кути ромба
+        if "усі кути ромба" in self.text:
+            if angle:
+                internal_angle = angle
+                double_angle = internal_angle * 2
+                other_angle = (360 - double_angle * 2) / 2
+                return f"Кути ромба: {double_angle}°, {double_angle}°, {other_angle}°, {other_angle}°"
 
+        # Задача 3: Діагоналі ромба
+        if re.search(r"\bдіагонал[іь]\b", self.text, re.IGNORECASE):
+            if side and angle:
+                d1, d2 = self.calculate_diagonals(side, angle)
+                return f"Діагональ ромба з стороною {side} і кутом {angle}° має довжину {d1:.2f}"
+            else:
+                return "Не вдалося обчислити діагоналі через відсутність сторони або кута."
+
+        # Задача 5: Координати ромба
         if "координатами" in self.text and len(coordinates) == 4:
             side_length = self.calculate_side_length(coordinates)
             perimeter = 4 * side_length
@@ -98,10 +125,12 @@ class GeometrySolver:
         return "Не вдалося знайти достатньо даних для розв'язання задачі."
 
 
+# Тестові приклади
 tests = [
     "Побудувати ромб ABCD зі стороною 3, знайти його периметр.",
-    "Побудувати ромб з координатами А(4,2), В(6,4), С(4,6), D(2,4), обчислити довжину сторони, знайти його периметр.",
-    "Побудувати ромб ABCD зі стороною 2 і кутом 60°, знайти його площу.",
+    "Побудувати ромб ABCD зі стороною 2 і кутом 30°, знайти його площу.",
+    "Побудувати ромб ABCD зі стороною 8 і кутом 30°, знайти його діагональ.",
+    "Діагональ AC ромба ABCD утворює зі стороною AD кут 42°. Знайдіть усі кути ромба."
 ]
 
 for i, command_text in enumerate(tests, start=1):
